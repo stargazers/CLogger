@@ -1,0 +1,19 @@
+CLogger
+=======
+
+	Description:
+		A class for logging what uses CLog for actual logging. This is
+		the class what should be used for normal logging cases.
+
+	License:
+		GNU AGPL
+
+	Author:
+		Aleksi Räsänen
+		aleksi.rasanen@runosydan.net
+
+	Copyright:
+		Aleksi Räsänen, 2012
+
+	Example:
+		See test.php
