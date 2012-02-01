@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		//  __construct
 		/*!
 			@brief Initializes class variables
+			@return Nothing
 		*/
 		// ************************************************** 
 		public function __construct()
@@ -49,6 +50,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		/*!
 			@brief Sets a logging class instance
 			@param $log Logging class instance to use
+			@return Nothing
 		*/
 		// ************************************************** 
 		public function setLoggingClassInstance( $log )
@@ -78,12 +80,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			@brief Logs a message in a log if logging class is set.
 			  If class is not set this does nothing.
 			@param $msg Message
+			@return Nothing
 		*/
 		// ************************************************** 
 		public function logMsg( $msg )
 		{
 			if( $this->loggingClassInstance != '' )
 				$this->loggingClassInstance->add( $msg );
+		}
+
+		// ************************************************** 
+		//  writeLogToFile
+		/*!
+			@brief Writes a log to the file if logging class is set.
+			  If class is not set, this does nothing.
+			@param $filename Log filename to write
+			@param $type Log file type, 'html' or 'text'
+			@return Nothing
+		*/
+		// ************************************************** 
+		public function writeLogToFile( $filename, $type )
+		{
+			if( $this->loggingClassInstance != '' )
+				$this->loggingClassInstance->writeLogToFile( $filename, $type );
 		}
 	}
 
