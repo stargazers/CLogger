@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	// ************************************************** 
 	//  CLogger
 	/*!
-		@brief Class for logging. This class requires CLog
-		  class for actual logging.
+		@brief Class for logging. This class requires 
+		  CLog class for actual logging.
 		@author Aleksi Räsänen
 		@copyright Aleksi Räsänen, 2012
 		@email aleksi.rasanen@runosydan.net
@@ -31,7 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	// ************************************************** 
 	class CLogger
 	{
-		private $loggingClassInstance;
+		// Logging class instance
+		private $log;
+
+		// All function calls is stored here. We update this after
+		// every In method... call and after every logReturn call.
+		private $function_history;
 
 		// ************************************************** 
 		//  __construct
@@ -42,20 +47,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// ************************************************** 
 		public function __construct()
 		{
-			$this->loggingClassInstance = '';
+			$this->log = '';
 		}
 
 		// ************************************************** 
 		//  setLoggingClassInstance
 		/*!
-			@brief Sets a logging class instance
+			@brief Sets a logging class instance and calls a method
+			  which set default message type regexpes.
 			@param $log Logging class instance to use
 			@return Nothing
 		*/
 		// ************************************************** 
 		public function setLoggingClassInstance( $log )
 		{
-			$this->loggingClassInstance = $log;
+			$this->log = $log;
+			$this->setDefaultMessageTypes();
+		}
+
+		// ************************************************** 
+		//  setDefaultMessageTypes
+		/*!
+			@brief Sets default message types which we normally
+			  want to match. These are "In method:", "Param:",
+			  "Error:", "Info:" and "Query:"
+			@return Nothing
+		*/
+		// ************************************************** 
+		private function setDefaultMessageTypes()
+		{
+			$this->log->setMessageType( 'in_method', '^In method:' );
+			$this->log->setMessageType( 'param', '^Param:' );
+			$this->log->setMessageType( 'error', '^Error:' );
+			$this->log->setMessageType( 'info', '^Info:' );
+			$this->log->setMessageType( 'query', '^Query:' );
 		}
 
 		// ************************************************** 
@@ -68,10 +93,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// ************************************************** 
 		public function getLoggingClassInstance()
 		{
-			if( $this->loggingClassInstance == '' )
+			if( $this->log == '' )
 				return -1;
 
-			return $this->loggingClassInstance;
+			return $this->log;
 		}
 
 		// ************************************************** 
@@ -85,8 +110,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// ************************************************** 
 		public function logMsg( $msg )
 		{
-			if( $this->loggingClassInstance != '' )
-				$this->loggingClassInstance->add( $msg );
+			if( $this->log != '' )
+				$this->log->add( $msg );
+		}
+
+		// ************************************************** 
+		//  logFunction
+		/*!
+			@brief Method which will simplify calling of
+			  logMsg when we want to log 'In method:' messages
+			  with its parameters
+			@param $function_name Name of a caller function
+			@param $paramters Parameters array
+			@return Nothing
+		*/
+		// ************************************************** 
+		public function logFunction( $function_name, $parameters )
+		{
+			if( $this->log == '' )
+				return;
+
+			$this->function_history[] = $function_name;
+			$this->log->setFunctionWeLog( $function_name );
+			$this->logMsg( 'In method: ' . $function_name );
+
+			if(! is_array( $parameters ) )
+				return;
+
+			foreach( $parameters as $param_name => $param_value )
+			{
+				if( is_object( $param_value ) )
+				{
+					$this->logMsg( 'Param: $' . $param_name . ' is object.' );
+					continue;
+				}
+
+				if(! is_array( $param_value ) )
+				{
+					$this->logMsg( 'Param: $' . $param_name 
+						. ' is ' . $param_value );
+					continue;
+				}
+
+				$this->logMsg( 'Param: $' . $param_name . ' is an array '
+					. 'and it has next key/values: ' );
+
+				foreach( $param_value as $key => $value )
+					$this->logMsg( "\t" . $key . ' => ' . $value );
+			}
 		}
 
 		// ************************************************** 
@@ -101,8 +172,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// ************************************************** 
 		public function writeLogToFile( $filename, $type )
 		{
-			if( $this->loggingClassInstance != '' )
-				$this->loggingClassInstance->writeLogToFile( $filename, $type );
+			if( $this->log != '' )
+				$this->log->writeLogToFile( $filename, $type );
+		}
+
+		// ************************************************** 
+		//  logReturn
+		/*!
+			@brief Returns back to the previous function.
+			  This method should be called in the end of every function
+			  so we can log current method correctly.
+			@return Nothing 
+		*/
+		// ************************************************** 
+		public function logReturn()
+		{
+			$num = count( $this->function_history ) -2;
+
+			// Add previous method in function_history too!
+			$this->function_history[] = $this->function_history[$num];
+			$this->log->setFunctionWeLog( $this->function_history[$num] );
 		}
 	}
 
