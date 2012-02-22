@@ -38,6 +38,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		// every In method... call and after every logReturn call.
 		private $function_history;
 
+		// Should we automatically add all param array values to log?
+		private $log_array_values;
+
+
 		// ************************************************** 
 		//  __construct
 		/*!
@@ -48,6 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		public function __construct()
 		{
 			$this->log = '';
+			$this->log_array_values = false;
 		}
 
 		// ************************************************** 
@@ -66,21 +71,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		}
 
 		// ************************************************** 
-		//  setDefaultMessageTypes
+		//  setLogArrayValues
 		/*!
-			@brief Sets default message types which we normally
-			  want to match. These are "In method:", "Param:",
-			  "Error:", "Info:" and "Query:"
+			@brief Defines if we should log all array values when
+			  we have got array as a function parameter when we use
+			  logFunction method call
+			@param $bool Boolean, true if we have to log all param values,
+			  false if we want to log only 'param $xyz is an array.'
 			@return Nothing
 		*/
 		// ************************************************** 
-		private function setDefaultMessageTypes()
+		public function setLogArrayValues( $bool )
 		{
-			$this->log->setMessageType( 'in_method', '^In method:' );
-			$this->log->setMessageType( 'param', '^Param:' );
-			$this->log->setMessageType( 'error', '^Error:' );
-			$this->log->setMessageType( 'info', '^Info:' );
-			$this->log->setMessageType( 'query', '^Query:' );
+			$this->log_array_values = $bool;
 		}
 
 		// ************************************************** 
@@ -152,6 +155,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 					continue;
 				}
 
+				if(! $this->log_array_values )
+				{
+					$this->logMsg( 'Param: $' . $param_name . ' is an array.' );
+					continue;
+				}
+
 				$this->logMsg( 'Param: $' . $param_name . ' is an array '
 					. 'and it has next key/values: ' );
 
@@ -192,6 +201,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			// Add previous method in function_history too!
 			$this->function_history[] = $this->function_history[$num];
 			$this->log->setFunctionWeLog( $this->function_history[$num] );
+		}
+
+		// ************************************************** 
+		//  setDefaultMessageTypes
+		/*!
+			@brief Sets default message types which we normally
+			  want to match. These are "In method:", "Param:",
+			  "Error:", "Info:" and "Query:"
+			@return Nothing
+		*/
+		// ************************************************** 
+		private function setDefaultMessageTypes()
+		{
+			$this->log->setMessageType( 'in_method', '^In method:' );
+			$this->log->setMessageType( 'param', '^Param:' );
+			$this->log->setMessageType( 'error', '^Error:' );
+			$this->log->setMessageType( 'info', '^Info:' );
+			$this->log->setMessageType( 'query', '^Query:' );
 		}
 	}
 
