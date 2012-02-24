@@ -133,6 +133,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			if( $this->log == '' )
 				return;
 
+			if( $function_name == '' )
+			{
+				$bt = debug_backtrace();
+				$function_name = $bt[1]['function'];
+			}
+
 			$this->function_history[] = $function_name;
 			$this->log->setFunctionWeLog( $function_name );
 			$this->logMsg( 'In method: ' . $function_name );
