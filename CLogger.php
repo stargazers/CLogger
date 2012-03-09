@@ -204,9 +204,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		{
 			$num = count( $this->function_history ) -2;
 
-			// Add previous method in function_history too!
-			$this->function_history[] = $this->function_history[$num];
-			$this->log->setFunctionWeLog( $this->function_history[$num] );
+			if( isset( $this->function_history[$num] ) )
+			{
+				// Add previous method in function_history too!
+				$this->function_history[] = $this->function_history[$num];
+				$this->log->setFunctionWeLog( $this->function_history[$num] );
+			}
 		}
 
 		// ************************************************** 
